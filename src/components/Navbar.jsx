@@ -1,7 +1,8 @@
-// Navbar.jsx - Consistent styling with other components
+// Navbar.jsx - Updated with links to new pages
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import '../index.css';
+
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
 
@@ -19,8 +20,11 @@ const Navbar = () => {
             <Link to="/" className="text-white hover:bg-yellow-600 px-4 py-2 rounded-md text-lg font-medium transition-colors duration-200">
               Home
             </Link>
-            <Link to="/blog" className="text-white hover:bg-yellow-600 px-4 py-2 rounded-md text-lg font-medium transition-colors duration-200">
-              Blog
+            <Link to="/blogs" className="text-white hover:bg-yellow-600 px-4 py-2 rounded-md text-lg font-medium transition-colors duration-200">
+              Blogs
+            </Link>
+            <Link to="/create-blog" className="text-white hover:bg-yellow-600 px-4 py-2 rounded-md text-lg font-medium transition-colors duration-200">
+              Create Blog
             </Link>
             <button className="ml-4 bg-white text-yellow-600 hover:text-orange-600 hover:bg-gray-100 px-6 py-2 rounded-full text-lg font-bold shadow-md transition-all duration-200">
               Sign In
@@ -60,11 +64,18 @@ const Navbar = () => {
               Home
             </Link>
             <Link 
-              to="/blog" 
+              to="/blogs" 
               className="text-white hover:bg-yellow-600 block px-3 py-2 rounded-md text-base font-medium"
               onClick={() => setIsOpen(false)}
             >
-              Blog
+              Blogs
+            </Link>
+            <Link 
+              to="/create-blog" 
+              className="text-white hover:bg-yellow-600 block px-3 py-2 rounded-md text-base font-medium"
+              onClick={() => setIsOpen(false)}
+            >
+              Create Blog
             </Link>
             <button className="mt-2 w-full bg-white text-yellow-600 hover:bg-gray-100 px-3 py-2 rounded-md text-base font-medium">
               Sign In

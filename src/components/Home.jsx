@@ -38,7 +38,7 @@ const Home = () => {
         </div>
 
         <div className="mt-6 text-center">
-          <Link to="/blog" className="bg-gradient-to-r from-yellow-500 to-orange-500 px-8 py-4 text-lg font-bold rounded-full shadow-lg hover:shadow-xl text-white transform hover:scale-105 transition-all duration-300">
+          <Link to="/create-blog" className="bg-gradient-to-r from-yellow-500 to-orange-500 px-8 py-4 text-lg font-bold rounded-full shadow-lg hover:shadow-xl text-white transform hover:scale-105 transition-all duration-300">
             Start Your Culinary Journey
           </Link>
         </div>

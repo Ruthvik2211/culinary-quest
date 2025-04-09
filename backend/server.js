@@ -17,6 +17,7 @@ app.use(express.json());
 
 // Routes
 app.use('/api/blogs', require('./routes/blogRoutes'));
+app.use('/api/users', require('./routes/userRoutes'));
 
 // Default route
 app.get('/', (req, res) => {

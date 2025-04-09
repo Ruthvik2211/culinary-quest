@@ -1,4 +1,3 @@
-// src/components/Navbar.jsx
 import React, { useContext } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
@@ -18,7 +17,7 @@ const Navbar = () => {
         <div className="flex justify-between h-16">
           <div className="flex items-center">
             <Link to="/" className="flex-shrink-0 flex items-center">
-              <span className="text-xl font-bold text-orange-500">CulinaryConnect</span>
+              <span className="text-xl font-bold text-orange-500">CulinaryQuest</span>
             </Link>
             <div className="hidden sm:ml-6 sm:flex sm:space-x-8">
               <Link to="/" className="text-gray-700 hover:text-orange-500 px-3 py-2 text-sm font-medium">
@@ -37,9 +36,24 @@ const Navbar = () => {
           <div className="flex items-center">
             {userInfo ? (
               <div className="flex items-center space-x-4">
-                <Link to="/profile" className="text-gray-700 hover:text-orange-500 px-3 py-2 text-sm font-medium">
-                  Profile
-                </Link>
+                <div className="relative group">
+                  <Link to="/profile" className="text-gray-700 hover:text-orange-500 px-3 py-2 text-sm font-medium flex items-center">
+                    <span>Profile</span>
+                    {userInfo.profilePicture ? (
+                      <img 
+                        src={userInfo.profilePicture} 
+                        alt="Profile" 
+                        className="w-8 h-8 rounded-full ml-2 object-cover border-2 border-orange-200"
+                      />
+                    ) : (
+                      <div className="w-8 h-8 rounded-full ml-2 bg-orange-100 flex items-center justify-center border-2 border-orange-200">
+                        <span className="text-sm text-orange-500 font-semibold">
+                          {userInfo.name?.charAt(0)?.toUpperCase() || '?'}
+                        </span>
+                      </div>
+                    )}
+                  </Link>
+                </div>
                 <button
                   onClick={handleLogout}
                   className="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-md text-sm font-medium"

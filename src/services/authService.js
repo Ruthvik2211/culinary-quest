@@ -58,8 +58,17 @@ export const getUserProfile = async () => {
     };
     
     const response = await axios.get(`${API_URL}/profile`, config);
+    
+    // If the API returns additional or updated user data, 
+    // update the stored userInfo
+    if (response.data) {
+      const updatedUserInfo = { ...userInfo, ...response.data };
+      localStorage.setItem('userInfo', JSON.stringify(updatedUserInfo));
+    }
+    
     return response.data;
   } catch (error) {
+    console.error('Error fetching profile:', error.response?.data || error.message);
     throw error.response?.data?.message || error.message;
   }
 };

@@ -8,7 +8,8 @@ import SignIn from './components/SignIn';
 import SignUp from './components/SignUp';
 import ForgotPassword from './components/ForgotPassword';
 import ResetPassword from './components/ResetPassword';
-import Profile from './components/Profile';
+import ViewProfile from './components/ViewProfile';
+import UpdateProfile from './components/UpdateProfile';
 import './index.css';
 import Navbar from './components/Navbar';
 import { AuthProvider, AuthContext } from './context/AuthContext';
@@ -114,7 +115,15 @@ function App() {
                 path="/profile" 
                 element={
                   <ProtectedRoute>
-                    <Profile />
+                    <ViewProfile />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/update-profile" 
+                element={
+                  <ProtectedRoute>
+                    <UpdateProfile />
                   </ProtectedRoute>
                 } 
               />

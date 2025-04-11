@@ -1,3 +1,4 @@
+// backend/models/blogPost.js
 const mongoose = require('mongoose');
 
 const blogPostSchema = mongoose.Schema({
@@ -18,6 +19,15 @@ const blogPostSchema = mongoose.Schema({
   },
   authorAdvice: {
     type: String
+  },
+  author: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    required: true
+  },
+  authorName: {
+    type: String,
+    required: true
   },
   date: {
     type: Date,

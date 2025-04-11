@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState, useContext } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { updateBlogPost, deleteBlogPost } from '../services/api';
+import { AuthContext } from '../context/AuthContext';
 import '../index.css';
 
 const BlogList = ({ blogPosts, loading, setBlogPosts }) => {
@@ -13,6 +14,15 @@ const BlogList = ({ blogPosts, loading, setBlogPosts }) => {
     authorAdvice: ''
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const { userInfo } = useContext(AuthContext);
+  const navigate = useNavigate();
+
+  // If user is not logged in, redirect to login page
+  React.useEffect(() => {
+    if (!userInfo) {
+      navigate('/signin');
+    }
+  }, [userInfo, navigate]);
 
   // Function to extract YouTube video ID from URL
   const getYouTubeEmbedUrl = (url) => {
@@ -119,9 +129,9 @@ const BlogList = ({ blogPosts, loading, setBlogPosts }) => {
     <div className="min-h-screen bg-gradient-to-br from-amber-50 to-orange-100 py-20 px-4 sm:px-6 lg:px-8">
       <div className="max-w-4xl mx-auto">
         <h1 className="text-4xl font-extrabold text-center mb-12 text-transparent bg-clip-text bg-gradient-to-r from-yellow-600 to-orange-600">
-          Culinary Quest Blog
+          My Culinary Quest Blog
         </h1>
-        
+
         {/* Create New Blog Button */}
         <div className="mb-8 text-center">
           <Link 
@@ -143,17 +153,17 @@ const BlogList = ({ blogPosts, loading, setBlogPosts }) => {
                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
               </svg>
-              <span className="text-xl font-semibold">Loading blog posts...</span>
+              <span className="text-xl font-semibold">Loading your blog posts...</span>
             </div>
           </div>
         ) : (
           <div className="bg-white shadow-2xl rounded-2xl p-8">
-            <h2 className="text-2xl font-bold mb-8 text-yellow-600">Recent Culinary Adventures</h2>
+            <h2 className="text-2xl font-bold mb-8 text-yellow-600">Your Culinary Adventures</h2>
             
             {blogPosts.length === 0 ? (
               <div className="text-center py-12 text-gray-500 bg-amber-50 rounded-xl">
                 <span role="img" aria-label="Plate and utensils" className="text-5xl mb-4 inline-block">🍽️</span>
-                <p className="text-xl">No blog posts yet. Be the first to share your culinary journey!</p>
+                <p className="text-xl">You haven't created any blog posts yet. Share your first culinary journey!</p>
               </div>
             ) : (
               <div className="space-y-12">
@@ -275,15 +285,19 @@ const BlogList = ({ blogPosts, loading, setBlogPosts }) => {
                       ) : (
                         // Regular Post Display
                         <>
-                          <div className="flex justify-between items-center mb-3">
-                            <h3 className="text-2xl font-bold text-yellow-600">{post.title}</h3>
+                          <div className="flex justify-between items-start mb-3">
+                            <div>
+                              <h3 className="text-2xl font-bold text-yellow-600">{post.title}</h3>
+                              <p className="text-sm text-gray-500 mt-1">
+                                Posted on {postDate} by {post.authorName || userInfo?.name || "You"}
+                              </p>
+                            </div>
                             {post.category && (
                               <span className="bg-yellow-100 text-yellow-800 text-sm font-medium px-3 py-1 rounded-full">
                                 {post.category}
                               </span>
                             )}
                           </div>
-                          <p className="text-sm text-gray-500 mb-4">Posted on {postDate}</p>
                           
                           {/* Blog Content */}
                           <div className="text-gray-700 whitespace-pre-line leading-relaxed mb-6">

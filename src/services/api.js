@@ -13,8 +13,12 @@ const apiClient = axios.create({
   }
 });
 
-// Add request interceptor for logging
+// Add auth token to requests when available
 apiClient.interceptors.request.use(config => {
+  const userInfo = JSON.parse(localStorage.getItem('userInfo'));
+  if (userInfo && userInfo.token) {
+    config.headers.Authorization = `Bearer ${userInfo.token}`;
+  }
   console.log(`📤 Making ${config.method.toUpperCase()} request to: ${config.url}`);
   return config;
 });

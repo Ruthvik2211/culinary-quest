@@ -1,117 +1,88 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import Home from './components/Home';
-import NotFound from './components/NotFound';
+import Navbar from './components/Navbar'; // Make sure path is correct
+import Home from './components/Home'; // Assuming you have this component
 import BlogList from './components/BlogList';
 import CreateBlog from './components/CreateBlog';
-import SignIn from './components/SignIn';
+import SignIn from './components/SignIn'; // Assuming you have these auth components
 import SignUp from './components/SignUp';
-import ForgotPassword from './components/ForgotPassword';
-import ResetPassword from './components/ResetPassword';
 import ViewProfile from './components/ViewProfile';
 import UpdateProfile from './components/UpdateProfile';
-import './index.css';
-import Navbar from './components/Navbar';
 import { AuthProvider, AuthContext } from './context/AuthContext';
-import { fetchBlogPosts, createBlogPost, updateBlogPost, deleteBlogPost } from './services/api';
-
-// Protected route component
-const ProtectedRoute = ({ children }) => {
-  const { userInfo, loading } = React.useContext(AuthContext);
-  
-  if (loading) {
-    return <div className="pt-20 text-center">Loading...</div>;
-  }
-  
-  if (!userInfo) {
-    return <Navigate to="/signin" />;
-  }
-  
-  return children;
-};
+import { fetchBlogPosts, createBlogPost } from './services/api'; // Changed from fetchUserBlogPosts to fetchBlogPosts
 
 function App() {
   const [blogPosts, setBlogPosts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const { userInfo } = useContext(AuthContext);
 
   useEffect(() => {
     const loadBlogPosts = async () => {
-      try {
-        const posts = await fetchBlogPosts();
-        setBlogPosts(posts);
-      } catch (error) {
-        console.error('Failed to load blog posts', error);
-      } finally {
+      if (userInfo) { // Only fetch blog posts if user is logged in
+        try {
+          setLoading(true);
+          const data = await fetchBlogPosts(); // Changed from fetchUserBlogPosts
+          setBlogPosts(data);
+        } catch (error) {
+          console.error('Error loading blog posts:', error);
+        } finally {
+          setLoading(false);
+        }
+      } else {
         setLoading(false);
       }
     };
 
     loadBlogPosts();
-  }, []);
+  }, [userInfo]); // Re-fetch when userInfo changes (login/logout)
 
   const addBlogPost = async (newPost) => {
     try {
-      const savedPost = await createBlogPost(newPost);
-      setBlogPosts([savedPost, ...blogPosts]);
-      return savedPost;
+      const createdPost = await createBlogPost(newPost);
+      setBlogPosts([createdPost, ...blogPosts]);
+      return createdPost;
     } catch (error) {
-      console.error('Failed to add blog post', error);
+      console.error('Error adding blog post:', error);
       throw error;
     }
   };
 
-  const editBlogPost = async (id, updatedPost) => {
-    try {
-      const result = await updateBlogPost(id, updatedPost);
-      setBlogPosts(blogPosts.map(post => post._id === id ? result : post));
-      return result;
-    } catch (error) {
-      console.error(`Failed to update blog post with ID: ${id}`, error);
-      throw error;
+  // Protected route component
+  const ProtectedRoute = ({ children }) => {
+    if (!userInfo) {
+      return <Navigate to="/signin" />;
     }
-  };
-
-  const removeBlogPost = async (id) => {
-    try {
-      await deleteBlogPost(id);
-      setBlogPosts(blogPosts.filter(post => post._id !== id));
-    } catch (error) {
-      console.error(`Failed to delete blog post with ID: ${id}`, error);
-      throw error;
-    }
+    return children;
   };
 
   return (
-    <AuthProvider>
-      <Router>
-        <div className="min-h-screen bg-gradient-to-br from-amber-50 to-orange-100">
-          <Navbar />
-          <div className="pt-16">
-            <Routes>
-              <Route path="/" element={<Home />} />
-              <Route 
-                path="/blogs" 
-                element={
-                  <BlogList 
-                    blogPosts={blogPosts} 
-                    loading={loading} 
-                    setBlogPosts={setBlogPosts}
-                  />
-                } 
-              />
-              <Route 
-                path="/create-blog" 
-                element={
-                  <ProtectedRoute>
-                    <CreateBlog addBlogPost={addBlogPost} />
-                  </ProtectedRoute>
-                } 
-              />
-              <Route path="/signin" element={<SignIn />} />
-              <Route path="/signup" element={<SignUp />} />
-              <Route path="/forgot-password" element={<ForgotPassword />} />
-              <Route path="/reset-password/:token" element={<ResetPassword />} />
-              <Route 
+    <Router>
+      <div className="App min-h-screen bg-gray-50">
+        <Navbar />
+        <div className="pt-16"> {/* Add padding top to account for fixed navbar */}
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/signin" element={<SignIn />} />
+            <Route path="/signup" element={<SignUp />} />
+            
+            {/* Protected routes */}
+            <Route path="/blogs" element={
+              <ProtectedRoute>
+                <BlogList 
+                  blogPosts={blogPosts} 
+                  loading={loading} 
+                  setBlogPosts={setBlogPosts} 
+                />
+              </ProtectedRoute>
+            } />
+            
+            <Route path="/create-blog" element={
+              <ProtectedRoute>
+                <CreateBlog addBlogPost={addBlogPost} />
+              </ProtectedRoute>
+            } />
+            
+            <Route 
                 path="/profile" 
                 element={
                   <ProtectedRoute>
@@ -127,13 +98,18 @@ function App() {
                   </ProtectedRoute>
                 } 
               />
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </div>
+          </Routes>
         </div>
-      </Router>
-    </AuthProvider>
+      </div>
+    </Router>
   );
 }
 
-export default App;
+// Wrap the exported component with AuthProvider
+const AppWithAuth = () => (
+  <AuthProvider>
+    <App />
+  </AuthProvider>
+);
+
+export default AppWithAuth;

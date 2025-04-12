@@ -5,6 +5,20 @@ import { getBlogPostById } from '../services/api';
 import { useContext } from 'react';
 import { AuthContext } from '../context/AuthContext';
 
+const getYouTubeEmbedUrl = (url) => {
+  if (!url) return null;
+  
+  // Match YouTube URL patterns
+  const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
+  const match = url.match(regExp);
+  
+  // If match and video ID is 11 characters (standard for YouTube)
+  return (match && match[2].length === 11) 
+    ? `https://www.youtube.com/embed/${match[2]}` 
+    : null;
+};
+
+
 const BlogDetails = () => {
   const { id } = useParams();
   const [blog, setBlog] = useState(null);
@@ -126,20 +140,20 @@ const BlogDetails = () => {
             
             {/* Video content if available */}
             {blog.videoUrl && (
-              <div className="mb-8">
-                <h3 className="text-xl font-semibold mb-2">Video Tutorial</h3>
-                <div className="aspect-w-16 aspect-h-9 rounded-lg overflow-hidden shadow-md">
-                  <iframe
-                    src={blog.videoUrl}
-                    title="Recipe Video"
-                    frameBorder="0"
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                    allowFullScreen
-                    className="w-full h-full"
-                  ></iframe>
-                </div>
-              </div>
-            )}
+  <div className="mb-8">
+    <h3 className="text-xl font-semibold mb-2">Video Tutorial</h3>
+    <div className="rounded-lg overflow-hidden shadow-md">
+      <iframe
+        src={getYouTubeEmbedUrl(blog.videoUrl)}
+        title="Recipe Video"
+        frameBorder="0"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+        allowFullScreen
+        className="w-full h-64 md:h-96"
+      ></iframe>
+    </div>
+  </div>
+)}
             
             {/* Main content */}
             <div className="prose prose-orange max-w-none mb-8">

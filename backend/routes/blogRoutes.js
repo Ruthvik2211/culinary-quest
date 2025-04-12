@@ -5,7 +5,6 @@ const BlogPost = require('../models/blogPost');
 const protect = require('../middleware/authMiddleware');
 
 // Get all blog posts for the current user
-// Modified to be a protected route and filter by author
 router.get('/', protect, async (req, res) => {
   try {
     console.log('Fetching blog posts for user:', req.user._id);
@@ -18,7 +17,34 @@ router.get('/', protect, async (req, res) => {
   }
 });
 
-// Create a new blog post - requires authentication now
+// Get all public blog posts for the explore page (no auth required)
+router.get('/public', async (req, res) => {
+  try {
+    console.log('Fetching all public blog posts');
+    const blogPosts = await BlogPost.find().sort({ createdAt: -1 });
+    console.log(`Found ${blogPosts.length} public blog posts`);
+    res.json(blogPosts);
+  } catch (error) {
+    console.error('Error fetching public blog posts:', error);
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// Get a single public blog post by ID (no auth required)
+router.get('/public/:id', async (req, res) => {
+  try {
+    const blogPost = await BlogPost.findById(req.params.id);
+    if (!blogPost) {
+      return res.status(404).json({ message: 'Blog post not found' });
+    }
+    res.json(blogPost);
+  } catch (error) {
+    console.error('Error fetching blog post:', error);
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// Create a new blog post - requires authentication
 router.post('/', protect, async (req, res) => {
   console.log('Received request to create blog post:', req.body);
   const { title, content, category, videoUrl, authorAdvice } = req.body;
@@ -49,7 +75,7 @@ router.post('/', protect, async (req, res) => {
   }
 });
 
-// Get a single blog post by ID
+// Get a single blog post by ID (user's own posts)
 router.get('/:id', protect, async (req, res) => {
   try {
     const blogPost = await BlogPost.findOne({ 

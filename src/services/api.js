@@ -44,12 +44,35 @@ apiClient.interceptors.response.use(
   }
 );
 
+// Get user's own blog posts
 export const fetchBlogPosts = async () => {
   try {
     const response = await apiClient.get('/blogs');
     return response.data;
   } catch (error) {
     console.error('Failed to fetch blog posts');
+    throw error;
+  }
+};
+
+// Get all public blog posts for the explore page
+export const getAllPublicBlogPosts = async () => {
+  try {
+    const response = await apiClient.get('/blogs/public');
+    return response.data;
+  } catch (error) {
+    console.error('Failed to fetch public blog posts');
+    throw error;
+  }
+};
+
+// Get a single blog post by ID
+export const getBlogPostById = async (id) => {
+  try {
+    const response = await apiClient.get(`/blogs/public/${id}`);
+    return response.data;
+  } catch (error) {
+    console.error(`Failed to fetch blog post with ID: ${id}`);
     throw error;
   }
 };

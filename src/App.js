@@ -10,7 +10,8 @@ import ViewProfile from './components/ViewProfile';
 import UpdateProfile from './components/UpdateProfile';
 import { AuthProvider, AuthContext } from './context/AuthContext';
 import { fetchBlogPosts, createBlogPost } from './services/api'; // Changed from fetchUserBlogPosts to fetchBlogPosts
-
+import Explore from './components/Explore';
+import BlogDetails from './components/BlogDetails';
 function App() {
   const [blogPosts, setBlogPosts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -81,7 +82,8 @@ function App() {
                 <CreateBlog addBlogPost={addBlogPost} />
               </ProtectedRoute>
             } />
-            
+            <Route path="/explore" element={<Explore />} />
+            <Route path="/blog/:id" element={<BlogDetails />} />
             <Route 
                 path="/profile" 
                 element={

@@ -23,13 +23,18 @@ const Navbar = () => {
               <Link to="/" className="text-gray-700 hover:text-orange-500 px-3 py-2 text-sm font-medium">
                 Home
               </Link>
-              <Link to="/blogs" className="text-gray-700 hover:text-orange-500 px-3 py-2 text-sm font-medium">
-                Blogs
+              <Link to="/explore" className="text-gray-700 hover:text-orange-500 px-3 py-2 text-sm font-medium">
+                Explore
               </Link>
               {userInfo && (
-                <Link to="/create-blog" className="text-gray-700 hover:text-orange-500 px-3 py-2 text-sm font-medium">
-                  Create Blog
-                </Link>
+                <>
+                  <Link to="/blogs" className="text-gray-700 hover:text-orange-500 px-3 py-2 text-sm font-medium">
+                    My Blogs
+                  </Link>
+                  <Link to="/create-blog" className="text-gray-700 hover:text-orange-500 px-3 py-2 text-sm font-medium">
+                    Create Blog
+                  </Link>
+                </>
               )}
             </div>
           </div>

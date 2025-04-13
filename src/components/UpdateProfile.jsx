@@ -62,7 +62,7 @@ const UpdateProfile = () => {
       
       // Only include password if it's been provided
       const updatedData = {
-        name: formData.username, // Send as 'name' to match backend
+        name: formData.username, // Send as name instead of username
         email: formData.email,
         bio: formData.bio,
         profilePicture: formData.profilePicture,

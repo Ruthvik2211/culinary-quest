@@ -59,11 +59,14 @@ export const getUserProfile = async () => {
     
     const response = await axios.get(`${API_URL}/profile`, config);
     
-    // If the API returns additional or updated user data, 
-    // update the stored userInfo
+    // Merge the new data with existing userInfo
     if (response.data) {
-      const updatedUserInfo = { ...userInfo, ...response.data };
+      const updatedUserInfo = { 
+        ...userInfo, 
+        ...response.data 
+      };
       localStorage.setItem('userInfo', JSON.stringify(updatedUserInfo));
+      return updatedUserInfo; // Return the merged data
     }
     
     return response.data;
@@ -88,15 +91,26 @@ export const updateUserProfile = async (userData) => {
       }
     };
     
-    const response = await axios.put(`${API_URL}/profile`, userData, config);
+    // Make sure we're sending the right field names to match the backend
+    const dataToSend = {
+      name: userData.name || userData.username, // Support both name and username
+      email: userData.email,
+      bio: userData.bio,
+      profilePicture: userData.profilePicture,
+      password: userData.password
+    };
+    
+    const response = await axios.put(`${API_URL}/profile`, dataToSend, config);
     
     if (response.data) {
+      // Update local storage with new data
       const updatedUserInfo = { ...userInfo, ...response.data };
       localStorage.setItem('userInfo', JSON.stringify(updatedUserInfo));
     }
     
     return response.data;
   } catch (error) {
+    console.error('Profile update error:', error.response?.data || error.message);
     throw error.response?.data?.message || error.message;
   }
 };

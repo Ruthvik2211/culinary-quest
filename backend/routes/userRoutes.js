@@ -1,4 +1,3 @@
-// backend/routes/userRoutes.js
 const express = require('express');
 const router = express.Router();
 const User = require('../models/user');
@@ -69,6 +68,8 @@ router.post('/login', async (req, res) => {
         _id: user._id,
         name: user.name,
         email: user.email,
+        bio: user.bio,
+        profilePicture: user.profilePicture,
         isAdmin: user.isAdmin,
         token
       });
@@ -93,6 +94,8 @@ router.get('/profile', protect, async (req, res) => {
         _id: user._id,
         name: user.name,
         email: user.email,
+        bio: user.bio,
+        profilePicture: user.profilePicture,
         isAdmin: user.isAdmin,
       });
     } else {
@@ -115,6 +118,7 @@ router.put('/profile', protect, async (req, res) => {
       user.name = req.body.name || user.name;
       user.email = req.body.email || user.email;
       user.bio = req.body.bio || user.bio;
+      user.profilePicture = req.body.profilePicture || user.profilePicture;
       
       if (req.body.password) {
         user.password = req.body.password;
@@ -131,6 +135,8 @@ router.put('/profile', protect, async (req, res) => {
         _id: updatedUser._id,
         name: updatedUser.name,
         email: updatedUser.email,
+        bio: updatedUser.bio,
+        profilePicture: updatedUser.profilePicture,
         isAdmin: updatedUser.isAdmin,
         token
       });

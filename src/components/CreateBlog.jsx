@@ -62,7 +62,7 @@ const CreateBlog = ({ addBlogPost }) => {
     <div className="min-h-screen bg-gradient-to-br from-amber-50 to-orange-100 py-20 px-4 sm:px-6 lg:px-8">
       <div className="max-w-4xl mx-auto">
         <h1 className="text-4xl font-extrabold text-center mb-12 text-transparent bg-clip-text bg-gradient-to-r from-yellow-600 to-orange-600">
-          Create New Blog Post
+          Create New Recipe
         </h1>
         
         {/* Blog Post Form */}
@@ -72,7 +72,7 @@ const CreateBlog = ({ addBlogPost }) => {
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Basic Fields */}
             <div>
-              <label className="block text-lg font-medium mb-2 text-gray-700">Blog Title</label>
+              <label className="block text-lg font-medium mb-2 text-gray-700">Recipe Title</label>
               <input
                 type="text"
                 className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent transition-all duration-200"
@@ -104,7 +104,7 @@ const CreateBlog = ({ addBlogPost }) => {
             </div>
 
             <div>
-              <label className="block text-lg font-medium mb-2 text-gray-700">Blog Content</label>
+              <label className="block text-lg font-medium mb-2 text-gray-700">Recipe Content</label>
               <textarea
                 className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent transition-all duration-200"
                 value={content}

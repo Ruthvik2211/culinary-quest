@@ -1,4 +1,4 @@
-import React, { useState, useContext } from 'react';
+import React, { useState, useContext, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { updateBlogPost, deleteBlogPost } from '../services/api';
 import { AuthContext } from '../context/AuthContext';
@@ -11,9 +11,13 @@ const BlogList = ({ blogPosts, loading, setBlogPosts }) => {
     content: '',
     category: '',
     videoUrl: '',
-    authorAdvice: ''
+    authorAdvice: '',
+    videoFile: null,
+    clearVideo: false
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [previewUrl, setPreviewUrl] = useState(null);
+  const fileInputRef = useRef(null);
   const { userInfo } = useContext(AuthContext);
   const navigate = useNavigate();
 
@@ -52,8 +56,12 @@ const BlogList = ({ blogPosts, loading, setBlogPosts }) => {
       content: post.content,
       category: post.category,
       videoUrl: post.videoUrl || '',
-      authorAdvice: post.authorAdvice || ''
+      authorAdvice: post.authorAdvice || '',
+      videoFile: null,
+      clearVideo: false
     });
+    // Clear any previous preview
+    setPreviewUrl(null);
   };
 
   // Function to cancel editing
@@ -64,8 +72,14 @@ const BlogList = ({ blogPosts, loading, setBlogPosts }) => {
       content: '',
       category: '',
       videoUrl: '',
-      authorAdvice: ''
+      authorAdvice: '',
+      videoFile: null,
+      clearVideo: false
     });
+    setPreviewUrl(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
   };
 
   // Function to handle input changes in the edit form
@@ -75,6 +89,47 @@ const BlogList = ({ blogPosts, loading, setBlogPosts }) => {
       ...editFormData,
       [name]: value
     });
+  };
+
+  // Function to handle file input change
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      if (file.size > 100 * 1024 * 1024) { // 100MB limit
+        alert('File size exceeds 100MB limit');
+        e.target.value = '';
+        return;
+      }
+      
+      if (!file.type.startsWith('video/')) {
+        alert('Only video files are allowed');
+        e.target.value = '';
+        return;
+      }
+      
+      setEditFormData({
+        ...editFormData,
+        videoFile: file,
+        clearVideo: false // Ensure clearVideo is false when a new file is selected
+      });
+      
+      // Create a preview URL for the video
+      const newPreviewUrl = URL.createObjectURL(file);
+      setPreviewUrl(newPreviewUrl);
+    }
+  };
+
+  // Function to handle clearing the video
+  const handleClearVideo = () => {
+    setEditFormData({
+      ...editFormData,
+      videoFile: null,
+      clearVideo: true
+    });
+    setPreviewUrl(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
   };
 
   // Function to save edited post
@@ -92,6 +147,7 @@ const BlogList = ({ blogPosts, loading, setBlogPosts }) => {
       
       // Exit edit mode
       setEditingPost(null);
+      setPreviewUrl(null);
     } catch (error) {
       console.error('Failed to update blog post:', error);
       alert('Failed to update blog post. Please try again.');
@@ -171,6 +227,7 @@ const BlogList = ({ blogPosts, loading, setBlogPosts }) => {
                   const embedUrl = post.videoUrl ? getYouTubeEmbedUrl(post.videoUrl) : null;
                   const postDate = formatDate(post.date || post.createdAt);
                   const isEditing = editingPost === post._id;
+                  const hasLocalVideo = post.localVideo && post.localVideo.path;
                   
                   return (
                     <div key={post._id || post.id} className="border-b border-gray-200 pb-10 last:border-b-0 hover:bg-amber-50 p-6 rounded-lg transition-colors duration-200">
@@ -240,6 +297,59 @@ const BlogList = ({ blogPosts, loading, setBlogPosts }) => {
                             )}
                           </div>
                           
+                          {/* Local Video Upload Field */}
+                          <div>
+                            <label className="block text-sm font-medium mb-1 text-gray-700">
+                              Upload Video
+                              <span className="text-xs font-normal text-gray-500 ml-2">(Optional, Max 100MB)</span>
+                            </label>
+                            <input
+                              type="file"
+                              ref={fileInputRef}
+                              accept="video/*"
+                              onChange={handleFileChange}
+                              className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
+                            />
+                            
+                            {/* Video Preview */}
+                            {previewUrl && (
+                              <div className="mt-2">
+                                <h4 className="text-sm font-medium text-gray-700 mb-1">Video Preview:</h4>
+                                <video 
+                                  controls 
+                                  src={previewUrl} 
+                                  className="w-full max-h-64 rounded"
+                                ></video>
+                                <button
+                                  type="button"
+                                  onClick={() => handleClearVideo()}
+                                  className="mt-2 px-3 py-1 bg-red-100 text-red-700 rounded-md hover:bg-red-200 text-sm"
+                                >
+                                  Remove Video
+                                </button>
+                              </div>
+                            )}
+                            
+                            {/* Existing Local Video Display */}
+                            {!previewUrl && hasLocalVideo && !editFormData.clearVideo && (
+                              <div className="mt-2">
+                                <h4 className="text-sm font-medium text-gray-700 mb-1">Current Video:</h4>
+                                <video 
+                                  controls 
+                                  src={`http://localhost:5000${post.localVideo.path}`}
+                                  className="w-full max-h-64 rounded"
+                                ></video>
+                                <button
+                                  type="button"
+                                  onClick={() => handleClearVideo()}
+                                  className="mt-2 px-3 py-1 bg-red-100 text-red-700 rounded-md hover:bg-red-200 text-sm"
+                                >
+                                  Remove Video
+                                </button>
+                              </div>
+                            )}
+                          </div>
+                          
                           <div>
                             <label className="block text-sm font-medium mb-1 text-gray-700">
                               Author's Personal Advice
@@ -304,7 +414,24 @@ const BlogList = ({ blogPosts, loading, setBlogPosts }) => {
                             {post.content}
                           </div>
                           
-                          {/* Video Embed - Only if a valid YouTube URL was provided */}
+                          {/* Local Video - Display if available */}
+                          {hasLocalVideo && (
+                            <div className="mb-6">
+                              <h4 className="text-lg font-semibold text-gray-700 mb-3">Video Demonstration</h4>
+                              <div className="rounded-lg overflow-hidden shadow-md">
+                                <video 
+                                  controls 
+                                  className="w-full h-64 md:h-96"
+                                  src={`http://localhost:5000${post.localVideo.path}`}
+                                  preload="metadata"
+                                >
+                                  Your browser does not support the video tag.
+                                </video>
+                              </div>
+                            </div>
+                          )}
+                          
+                          {/* YouTube Video Embed - Only if a valid YouTube URL was provided */}
                           {embedUrl && (
                             <div className="mb-6">
                               <h4 className="text-lg font-semibold text-gray-700 mb-3">Video Demonstration</h4>

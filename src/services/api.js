@@ -79,9 +79,37 @@ export const getBlogPostById = async (id) => {
 
 export const createBlogPost = async (blogData) => {
   try {
-    const response = await apiClient.post('/blogs', blogData);
-    console.log('Blog post created successfully:', response.data);
-    return response.data;
+    // Check if we have a file to upload
+    if (blogData.videoFile) {
+      // Use FormData for multipart/form-data
+      const formData = new FormData();
+      
+      // Add the file to form data
+      formData.append('video', blogData.videoFile);
+      
+      // Add other blog data
+      Object.keys(blogData).forEach(key => {
+        if (key !== 'videoFile') {
+          formData.append(key, blogData[key]);
+        }
+      });
+      
+      // Use custom axios config for multipart/form-data
+      const response = await axios.post(`${API_URL}/blogs`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+          'Authorization': `Bearer ${JSON.parse(localStorage.getItem('userInfo')).token}`
+        }
+      });
+      
+      console.log('Blog post created successfully:', response.data);
+      return response.data;
+    } else {
+      // Standard JSON request (no file upload)
+      const response = await apiClient.post('/blogs', blogData);
+      console.log('Blog post created successfully:', response.data);
+      return response.data;
+    }
   } catch (error) {
     console.error('Failed to create blog post');
     throw error;
@@ -90,8 +118,35 @@ export const createBlogPost = async (blogData) => {
 
 export const updateBlogPost = async (id, blogData) => {
   try {
-    const response = await apiClient.put(`/blogs/${id}`, blogData);
-    return response.data;
+    // Check if we have a file to upload
+    if (blogData.videoFile) {
+      // Use FormData for multipart/form-data
+      const formData = new FormData();
+      
+      // Add the file to form data
+      formData.append('video', blogData.videoFile);
+      
+      // Add other blog data
+      Object.keys(blogData).forEach(key => {
+        if (key !== 'videoFile') {
+          formData.append(key, blogData[key]);
+        }
+      });
+      
+      // Use custom axios config for multipart/form-data
+      const response = await axios.put(`${API_URL}/blogs/${id}`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+          'Authorization': `Bearer ${JSON.parse(localStorage.getItem('userInfo')).token}`
+        }
+      });
+      
+      return response.data;
+    } else {
+      // Standard JSON request (no file upload)
+      const response = await apiClient.put(`/blogs/${id}`, blogData);
+      return response.data;
+    }
   } catch (error) {
     console.error(`Failed to update blog post with ID: ${id}`);
     throw error;

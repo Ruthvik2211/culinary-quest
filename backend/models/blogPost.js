@@ -17,6 +17,11 @@ const blogPostSchema = mongoose.Schema({
   videoUrl: {
     type: String
   },
+  localVideo: {
+    filename: String,
+    path: String,
+    mimetype: String
+  },
   authorAdvice: {
     type: String
   },

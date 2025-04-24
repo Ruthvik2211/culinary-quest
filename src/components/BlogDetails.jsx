@@ -18,7 +18,6 @@ const getYouTubeEmbedUrl = (url) => {
     : null;
 };
 
-
 const BlogDetails = () => {
   const { id } = useParams();
   const [blog, setBlog] = useState(null);
@@ -26,6 +25,14 @@ const BlogDetails = () => {
   const [error, setError] = useState(null);
   const { userInfo } = useContext(AuthContext);
   const navigate = useNavigate();
+  const [isVideoLoading, setIsVideoLoading] = useState(false);
+  const [videoError, setVideoError] = useState(false);
+
+  // Create the full API URL with base URL for local video
+  const getFullVideoUrl = (localVideoPath) => {
+    const baseApiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+    return `${baseApiUrl}${localVideoPath}`;
+  };
 
   useEffect(() => {
     const fetchBlogDetails = async () => {
@@ -55,6 +62,17 @@ const BlogDetails = () => {
     navigate(-1);
   };
 
+  // Handle video load events
+  const handleVideoLoad = () => {
+    setIsVideoLoading(false);
+    setVideoError(false);
+  };
+
+  const handleVideoError = () => {
+    setIsVideoLoading(false);
+    setVideoError(true);
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-amber-50 to-orange-100 flex justify-center items-center py-20">
@@ -81,7 +99,9 @@ const BlogDetails = () => {
   }
 
   const isAuthor = userInfo && userInfo._id === blog.author;
-
+  const youtubeEmbedUrl = blog.videoUrl ? getYouTubeEmbedUrl(blog.videoUrl) : null;
+  const hasLocalVideo = blog.localVideo && blog.localVideo.path;
+  
   return (
     <div className="min-h-screen bg-gradient-to-br from-amber-50 to-orange-100 py-20 px-4">
       <div className="max-w-4xl mx-auto pt-16">
@@ -138,22 +158,53 @@ const BlogDetails = () => {
               )}
             </div>
             
-            {/* Video content if available */}
-            {blog.videoUrl && (
-  <div className="mb-8">
-    <h3 className="text-xl font-semibold mb-2">Video Tutorial</h3>
-    <div className="rounded-lg overflow-hidden shadow-md">
-      <iframe
-        src={getYouTubeEmbedUrl(blog.videoUrl)}
-        title="Recipe Video"
-        frameBorder="0"
-        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-        allowFullScreen
-        className="w-full h-64 md:h-96"
-      ></iframe>
-    </div>
-  </div>
-)}
+            {/* Video content - YouTube or Local Video */}
+            {(youtubeEmbedUrl || hasLocalVideo) && (
+              <div className="mb-8">
+                <h3 className="text-xl font-semibold mb-2">Video Tutorial</h3>
+                <div className="rounded-lg overflow-hidden shadow-md">
+                  {/* Priority: Show local video if available, otherwise YouTube embed */}
+                  {hasLocalVideo ? (
+                    <>
+                      {isVideoLoading && (
+                        <div className="flex justify-center items-center bg-gray-100 h-64 md:h-96">
+                          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-orange-500"></div>
+                        </div>
+                      )}
+                      
+                      {videoError && (
+                        <div className="flex flex-col justify-center items-center bg-gray-100 h-64 md:h-96">
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-16 w-16 text-red-500 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                          </svg>
+                          <p className="text-gray-600">Unable to load video</p>
+                        </div>
+                      )}
+                      
+                      <video 
+                        src={getFullVideoUrl(blog.localVideo.path)} 
+                        controls 
+                        className="w-full h-64 md:h-96"
+                        onPlay={() => setIsVideoLoading(true)}
+                        onLoadedData={handleVideoLoad}
+                        onError={handleVideoError}
+                      >
+                        Your browser does not support the video tag.
+                      </video>
+                    </>
+                  ) : youtubeEmbedUrl && (
+                    <iframe
+                      src={youtubeEmbedUrl}
+                      title="Recipe Video"
+                      frameBorder="0"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                      allowFullScreen
+                      className="w-full h-64 md:h-96"
+                    ></iframe>
+                  )}
+                </div>
+              </div>
+            )}
             
             {/* Main content */}
             <div className="prose prose-orange max-w-none mb-8">

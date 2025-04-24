@@ -7,9 +7,11 @@ const CreateBlog = ({ addBlogPost }) => {
   const [content, setContent] = useState('');
   const [category, setCategory] = useState('');
   const [videoUrl, setVideoUrl] = useState('');
+  const [videoFile, setVideoFile] = useState(null);
   const [authorAdvice, setAuthorAdvice] = useState('');
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [videoPreview, setVideoPreview] = useState(null);
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
@@ -26,6 +28,8 @@ const CreateBlog = ({ addBlogPost }) => {
         category,
         videoUrl: videoUrl.trim(),
         authorAdvice: authorAdvice.trim(),
+        // Add video file if one was selected
+        videoFile: videoFile
       };
       
       // Add new post using the function passed as prop (which now calls the API)
@@ -36,6 +40,8 @@ const CreateBlog = ({ addBlogPost }) => {
       setContent('');
       setCategory('');
       setVideoUrl('');
+      setVideoFile(null);
+      setVideoPreview(null);
       setAuthorAdvice('');
       
       console.log("Blog Submitted Successfully");
@@ -56,6 +62,46 @@ const CreateBlog = ({ addBlogPost }) => {
     
     const youtubeRegex = /^(https?:\/\/)?(www\.)?(youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]{11})$/;
     return youtubeRegex.test(url);
+  };
+
+  // Handle video file upload
+  const handleVideoUpload = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      // Validate file type
+      if (!file.type.startsWith('video/')) {
+        alert('Please upload a valid video file');
+        return;
+      }
+      
+      // Validate file size (max 100MB)
+      if (file.size > 100 * 1024 * 1024) {
+        alert('Video file size should be less than 100MB');
+        return;
+      }
+      
+      setVideoFile(file);
+      
+      // Create preview URL
+      const previewUrl = URL.createObjectURL(file);
+      setVideoPreview(previewUrl);
+      
+      // Clear YouTube URL if a file is uploaded
+      if (videoUrl) {
+        setVideoUrl('');
+      }
+    }
+  };
+
+  // Clear selected video file
+  const handleClearVideo = () => {
+    setVideoFile(null);
+    setVideoPreview(null);
+    
+    // Release the object URL to avoid memory leaks
+    if (videoPreview) {
+      URL.revokeObjectURL(videoPreview);
+    }
   };
 
   return (
@@ -140,39 +186,131 @@ const CreateBlog = ({ addBlogPost }) => {
             {/* Advanced Options - Conditionally Rendered */}
             {showAdvanced && (
               <div className="space-y-6 pt-2 pb-4 border-t border-gray-200">
-                {/* Video URL Field */}
+                {/* Video Options Section */}
                 <div className="mt-6">
-                  <label className="block text-lg font-medium mb-2 text-gray-700">
-                    Video URL 
-                    <span className="text-sm font-normal text-gray-500 ml-2">(Optional - YouTube link to accompany your post)</span>
-                  </label>
-                  <input
-                    type="url"
-                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent transition-all duration-200"
-                    value={videoUrl}
-                    onChange={(e) => setVideoUrl(e.target.value)}
-                    placeholder="https://youtube.com/watch?v=..."
-                    disabled={isSubmitting}
-                  />
-                  {videoUrl && !isValidYouTubeUrl(videoUrl) && (
-                    <p className="text-red-500 mt-1 text-sm">Please enter a valid YouTube URL</p>
-                  )}
-                </div>
+                  <h3 className="text-lg font-medium mb-3 text-gray-700">Video Options</h3>
+                  
+                  {/* Video Upload Option */}
+                  <div className="mb-4">
+                    <label className="block text-base font-medium mb-2 text-gray-700">
+                      Upload Video
+                      <span className="text-sm font-normal text-gray-500 ml-2">(Optional - Maximum 100MB)</span>
+                    </label>
+                    
+                    {!videoFile ? (
+                      <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-lg">
+                        <div className="space-y-1 text-center">
+                          <svg className="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48" aria-hidden="true">
+                            <path d="M24 10v13m0 0l-4-4m4 4l4-4M6 20.4V6.1A2.1 2.1 0 018.1 4h31.8A2.1 2.1 0 0142 6.1v26.8a2.1 2.1 0 01-2.1 2.1H8.1A2.1 2.1 0 016 32.9V28" strokeLinecap="round" strokeWidth="2" />
+                          </svg>
+                          <div className="flex justify-center text-sm text-gray-600">
+                            <label htmlFor="video-upload" className="relative cursor-pointer bg-white rounded-md font-medium text-yellow-600 hover:text-yellow-500 focus-within:outline-none">
+                              <span>Upload a video</span>
+                              <input 
+                                id="video-upload" 
+                                name="video-upload" 
+                                type="file" 
+                                accept="video/*"
+                                className="sr-only"
+                                onChange={handleVideoUpload}
+                                disabled={isSubmitting}
+                              />
+                            </label>
+                          </div>
+                          <p className="text-xs text-gray-500">MP4, MOV, AVI up to 100MB</p>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="mt-1">
+                        <div className="p-4 border border-gray-200 rounded-lg bg-gray-50">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center">
+                              <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-yellow-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                              </svg>
+                              <span className="ml-2 text-sm font-medium text-gray-900 truncate">
+                                {videoFile.name}
+                              </span>
+                            </div>
+                            <button
+                              type="button"
+                              onClick={handleClearVideo}
+                              className="ml-2 text-red-600 hover:text-red-800"
+                              disabled={isSubmitting}
+                            >
+                              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                              </svg>
+                            </button>
+                          </div>
+                          
+                          {/* Video preview */}
+                          {videoPreview && (
+                            <div className="mt-3">
+                              <video 
+                                controls 
+                                className="w-full h-auto rounded"
+                                src={videoPreview}
+                              >
+                                Your browser does not support the video tag.
+                              </video>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                  
+                  {/* Or separator */}
+                  <div className="relative my-4">
+                    <div className="absolute inset-0 flex items-center">
+                      <div className="w-full border-t border-gray-300"></div>
+                    </div>
+                    <div className="relative flex justify-center text-sm">
+                      <span className="px-2 bg-white text-gray-500">Or</span>
+                    </div>
+                  </div>
+                  
+                  {/* YouTube URL Field */}
+                  <div className={videoFile ? "opacity-50" : ""}>
+                    <label className="block text-base font-medium mb-2 text-gray-700">
+                      YouTube Video URL 
+                      <span className="text-sm font-normal text-gray-500 ml-2">(Optional)</span>
+                    </label>
+                    <input
+                      type="url"
+                      className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent transition-all duration-200"
+                      value={videoUrl}
+                      onChange={(e) => setVideoUrl(e.target.value)}
+                      placeholder="https://youtube.com/watch?v=..."
+                      disabled={isSubmitting || videoFile !== null}
+                    />
+                    {videoUrl && !isValidYouTubeUrl(videoUrl) && (
+                      <p className="text-red-500 mt-1 text-sm">Please enter a valid YouTube URL</p>
+                    )}
+                    {videoFile && (
+                      <p className="text-sm text-gray-500 mt-1">
+                        YouTube URL cannot be used when a video file is uploaded. Clear the uploaded video to use a YouTube URL instead.
+                      </p>
+                    )}
+                  </div>
 
-                {/* Author's Personal Advice Field */}
-                <div>
-                  <label className="block text-lg font-medium mb-2 text-gray-700">
-                    Author's Personal Advice
-                    <span className="text-sm font-normal text-gray-500 ml-2">(Optional - Share your personal tips)</span>
-                  </label>
-                  <textarea
-                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent transition-all duration-200"
-                    value={authorAdvice}
-                    onChange={(e) => setAuthorAdvice(e.target.value)}
-                    rows="4"
-                    placeholder="Share your personal tips, tricks or recommendations related to this recipe or culinary adventure..."
-                    disabled={isSubmitting}
-                  />
+                  {/* Author's Personal Advice Field */}
+                  <div className="mt-6">
+                    <label className="block text-lg font-medium mb-2 text-gray-700">
+                      Author's Personal Advice
+                      <span className="text-sm font-normal text-gray-500 ml-2">(Optional - Share your personal tips)</span>
+                    </label>
+                    <textarea
+                      className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent transition-all duration-200"
+                      value={authorAdvice}
+                      onChange={(e) => setAuthorAdvice(e.target.value)}
+                      rows="4"
+                      placeholder="Share your personal tips, tricks or recommendations related to this recipe or culinary adventure..."
+                      disabled={isSubmitting}
+                    />
+                  </div>
                 </div>
               </div>
             )}

@@ -185,7 +185,7 @@ const BlogList = ({ blogPosts, loading, setBlogPosts }) => {
     <div className="min-h-screen bg-gradient-to-br from-amber-50 to-orange-100 py-20 px-4 sm:px-6 lg:px-8">
       <div className="max-w-4xl mx-auto">
         <h1 className="text-4xl font-extrabold text-center mb-12 text-transparent bg-clip-text bg-gradient-to-r from-yellow-600 to-orange-600">
-          My Culinary Quest Blog
+        My Culinary Quests
         </h1>
 
         {/* Create New Blog Button */}
@@ -197,7 +197,7 @@ const BlogList = ({ blogPosts, loading, setBlogPosts }) => {
             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 inline mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
             </svg>
-            Create New Blog
+            Create New Recipe
           </Link>
         </div>
         
@@ -209,7 +209,7 @@ const BlogList = ({ blogPosts, loading, setBlogPosts }) => {
                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
               </svg>
-              <span className="text-xl font-semibold">Loading your blog posts...</span>
+              <span className="text-xl font-semibold">Loading your recipes...</span>
             </div>
           </div>
         ) : (
@@ -234,10 +234,10 @@ const BlogList = ({ blogPosts, loading, setBlogPosts }) => {
                       {isEditing ? (
                         // Edit Form
                         <div className="space-y-4">
-                          <h3 className="text-2xl font-bold text-yellow-600 mb-4">Edit Blog Post</h3>
+                          <h3 className="text-2xl font-bold text-yellow-600 mb-4">Edit Recipe</h3>
                           
                           <div>
-                            <label className="block text-sm font-medium mb-1 text-gray-700">Blog Title</label>
+                            <label className="block text-sm font-medium mb-1 text-gray-700">Recipe Title</label>
                             <input
                               type="text"
                               name="title"
@@ -268,7 +268,7 @@ const BlogList = ({ blogPosts, loading, setBlogPosts }) => {
                           </div>
                           
                           <div>
-                            <label className="block text-sm font-medium mb-1 text-gray-700">Blog Content</label>
+                            <label className="block text-sm font-medium mb-1 text-gray-700">Recipe Content</label>
                             <textarea
                               name="content"
                               className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent"

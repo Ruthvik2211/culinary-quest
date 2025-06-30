@@ -24,4 +24,4 @@ yarn-error.log*
 
 # keys
 
-/backend/.env
+./backend/.env
